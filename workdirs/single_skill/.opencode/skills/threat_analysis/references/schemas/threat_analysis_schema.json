@@ -1,0 +1,716 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Threat Analysis Output Schema",
+  "description": "代码仓威胁分析输出结构化数据。包含攻击面-向量-风险-等级四层映射及攻击链。",
+  "type": "object",
+  "required": ["meta", "value_assets", "attack_surfaces", "attack_vectors", "control_points", "risks", "attack_chains", "surface_risk_mapping", "statistics"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "元信息",
+      "required": ["product_name", "code_repo_path", "analysis_date", "tech_stack"],
+      "properties": {
+        "product_name": {
+          "type": "string",
+          "description": "产品名称",
+          "example": "my-app"
+        },
+        "code_repo_path": {
+          "type": "string",
+          "description": "代码仓库路径",
+          "example": "D:/projects/my-app"
+        },
+        "analysis_date": {
+          "type": "string",
+          "description": "分析日期（ISO 8601格式）",
+          "example": "2025-06-22T10:00:00Z"
+        },
+        "tech_stack": {
+          "type": "object",
+          "description": "技术栈信息",
+          "properties": {
+            "languages": {
+              "type": "array",
+              "description": "编程语言列表",
+              "items": {"type": "string", "example": "Java"}
+            },
+            "frameworks": {
+              "type": "array",
+              "description": "框架列表",
+              "items": {"type": "string", "example": "Spring Boot"}
+            },
+            "databases": {
+              "type": "array",
+              "description": "数据库列表",
+              "items": {"type": "string", "example": "MySQL"}
+            },
+            "middleware": {
+              "type": "array",
+              "description": "中间件列表",
+              "items": {"type": "string", "example": "Kafka"}
+            },
+            "entry_files": {
+              "type": "array",
+              "description": "入口文件列表",
+              "items": {"type": "string", "example": "src/main/Application.java"}
+            },
+            "dir_structure": {
+              "type": "string",
+              "description": "目录结构描述",
+              "example": "标准Maven项目结构"
+            }
+          }
+        },
+        "excluded_dirs": {
+          "type": "array",
+          "description": "排除目录列表",
+          "items": {"type": "string", "example": "vendor"}
+        },
+        "focus_dirs": {
+          "type": "array",
+          "description": "重点分析目录列表",
+          "items": {"type": "string", "example": "src/controllers"}
+        }
+      }
+    },
+    "value_assets": {
+      "type": "array",
+      "description": "价值资产列表",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "name", "description", "type", "classification", "location"],
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "description": "资产实例ID，格式：VA-{序号}，序号从001递增",
+            "example": "VA-001"
+          },
+          "name": {
+            "type": "string",
+            "description": "资产类型名称，来自enumeration.md第1.1章",
+            "example": "数据资产"
+          },
+          "description": {
+            "type": "string",
+            "description": "资产业务场景描述",
+            "example": "用户数据库-存储用户PII信息"
+          },
+          "type": {
+            "type": "string",
+            "description": "资产类型",
+            "enum": ["data", "credential", "key", "service", "config", "algorithm", "infra", "other"]
+          },
+          "classification": {
+            "type": "string",
+            "description": "资产密级",
+            "enum": ["public", "internal", "confidential", "top_secret", "other"]
+          },
+          "location": {
+            "type": "string",
+            "description": "资产存储位置类型",
+            "enum": ["database", "file_system", "memory", "secret_store", "code_hardcoded", "env_variable", "log_storage", "cache", "message_queue", "other"]
+          },
+          "location_detail": {
+            "type": "string",
+            "description": "位置详细描述",
+            "example": "MySQL集群 - user_db.users表"
+          },
+          "custodian": {
+            "type": "string",
+            "description": "资产保管方",
+            "example": "用户服务"
+          },
+          "protection_requirements": {
+            "type": "array",
+            "description": "保护要求",
+            "items": {"type": "string", "enum": ["机密性", "完整性", "可用性"]}
+          },
+          "code_evidence": {
+            "type": "array",
+            "description": "代码证据",
+            "items": {"type": "string", "example": "src/models/User.java"}
+          }
+        }
+      }
+    },
+    "attack_surfaces": {
+      "type": "array",
+      "description": "攻击面列表",
+      "items": {
+        "type": "object",
+        "required": ["surface_id", "surface_name", "surfaces_type", "auth_required", "network_zone"],
+        "properties": {
+          "surface_id": {
+            "type": "string",
+            "description": "攻击面实例ID，格式：AS-{序号}，序号从001递增",
+            "example": "AS-001"
+          },
+          "surface_name": {
+            "type": "string",
+            "description": "攻击面名称，来自enumeration.md第2章",
+            "example": "登录认证API"
+          },
+          "surfaces_type": {
+            "type": "string",
+            "description": "攻击面类型KEY，来自enumeration.md第2章",
+            "example": "NET-API-LOGIN"
+          },
+          "description": {
+            "type": "string",
+            "description": "攻击面业务场景描述",
+            "example": "用户登录入口-支持手机号/邮箱登录"
+          },
+          "entry_type": {
+            "type": "string",
+            "description": "入口点类型",
+            "enum": ["http_api", "grpc_service", "websocket", "graphql", "web_ui", "cli_command", "file_interface", "message_consumer", "scheduled_task", "database_port", "cache_port", "debug_port", "other"]
+          },
+          "auth_required": {
+            "type": "string",
+            "description": "认证要求",
+            "enum": ["none", "token", "session", "certificate", "api_key", "oauth", "basic", "hmac", "custom", "unknown", "other"]
+          },
+          "network_zone": {
+            "type": "string",
+            "description": "网络区域",
+            "enum": ["internet", "dmz", "intranet", "cluster_internal", "localhost", "other"]
+          },
+          "exposure_mode": {
+            "type": "string",
+            "description": "暴露模式",
+            "enum": ["public_api", "authenticated_api", "internal_api", "admin_interface", "debug_endpoint", "health_check", "metrics_endpoint", "other"]
+          },
+          "trust_boundaries": {
+            "type": "array",
+            "description": "信任边界列表",
+            "items": {
+              "type": "object",
+              "required": ["boundary_type", "boundary_key", "description", "strength"],
+              "properties": {
+                "boundary_type": {
+                  "type": "string",
+                  "description": "边界类型",
+                  "enum": ["encryption", "data", "service", "other"]
+                },
+                "boundary_key": {
+                  "type": "string",
+                  "description": "边界KEY，来自enumeration.md第7章",
+                  "example": "BOUND-ENC-TLS"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "边界描述",
+                  "example": "客户端→服务端：TLS 1.2加密"
+                },
+                "strength": {
+                  "type": "string",
+                  "description": "边界强度",
+                  "enum": ["strong", "medium", "weak", "missing", "other"]
+                },
+                "code_evidence": {
+                  "type": "array",
+                  "description": "代码证据",
+                  "items": {"type": "string", "example": "src/config/ssl.properties"}
+                }
+              }
+            }
+          },
+          "code_evidence": {
+            "type": "array",
+            "description": "代码证据",
+            "items": {"type": "string", "example": "src/routes/auth.py:15"}
+          },
+          "linked_assets": {
+            "type": "array",
+            "description": "关联资产实例ID列表",
+            "items": {"type": "string", "example": "VA-001"}
+          }
+        }
+      }
+    },
+    "control_points": {
+      "type": "array",
+      "description": "控制点列表",
+      "items": {
+        "type": "object",
+        "required": ["control_id", "name", "description", "type", "effectiveness"],
+        "properties": {
+          "control_id": {
+            "type": "string",
+            "description": "控制点实例ID，格式：CP-{序号}，序号从001递增",
+            "example": "CP-001"
+          },
+          "name": {
+            "type": "string",
+            "description": "控制类型名称，来自enumeration.md第3.1章",
+            "example": "认证控制"
+          },
+          "description": {
+            "type": "string",
+            "description": "控制点业务场景描述",
+            "example": "JWT Token验证-有效期24小时"
+          },
+          "type": {
+            "type": "string",
+            "description": "控制类型KEY，来自enumeration.md第3章",
+            "enum": ["authentication", "authorization", "input_validation", "output_encoding", "encryption", "rate_limiting", "session_management", "logging", "error_handling", "cors_policy", "csrf_protection", "file_validation", "sql_parameterization", "secrets_management", "other"]
+          },
+          "effectiveness": {
+            "type": "string",
+            "description": "控制有效性",
+            "enum": ["strong", "medium", "weak", "bypassed", "missing", "misconfigured", "other"]
+          },
+          "deployment_layer": {
+            "type": "string",
+            "description": "部署层",
+            "enum": ["network", "gateway", "middleware", "application", "data", "infrastructure", "other"]
+          },
+          "target": {
+            "type": "string",
+            "description": "保护对象描述",
+            "example": "所有API端点"
+          },
+          "code_evidence": {
+            "type": "array",
+            "description": "代码证据",
+            "items": {"type": "string", "example": "src/middleware/auth.py:20"}
+          },
+          "protects": {
+            "type": "array",
+            "description": "保护的攻击面实例ID列表",
+            "items": {"type": "string", "example": "AS-001"}
+          },
+          "bypass_methods": {
+            "type": "array",
+            "description": "绕过方法列表",
+            "items": {"type": "string", "example": "JWT算法混淆(none算法)"}
+          }
+        }
+      }
+    },
+    "attack_vectors": {
+      "type": "array",
+      "description": "攻击向量列表",
+      "items": {
+        "type": "object",
+        "required": ["vector_id", "vector_type", "vector_name", "applicable_surfaces"],
+        "properties": {
+          "vector_id": {
+            "type": "string",
+            "description": "向量实例ID，格式：IV-{序号}，序号从001递增",
+            "example": "IV-001"
+          },
+          "vector_type": {
+            "type": "string",
+            "description": "向量类型KEY，来自enumeration.md第4章",
+            "example": "IV-SQL-UNION"
+          },
+          "vector_name": {
+            "type": "string",
+            "description": "向量名称",
+            "example": "SQL Union注入"
+          },
+          "vector_category": {
+            "type": "string",
+            "description": "向量类别",
+            "example": "注入类向量"
+          },
+          "applicable_surfaces": {
+            "type": "array",
+            "description": "适用攻击面实例ID列表",
+            "items": {"type": "string", "example": "AS-001"}
+          },
+          "description": {
+            "type": "string",
+            "description": "向量描述",
+            "example": "构造UNION SELECT语句提取数据"
+          },
+          "code_pattern": {
+            "type": "string",
+            "description": "代码特征描述",
+            "example": "SQL拼接特征（见references/language_patterns.md第6章）"
+          },
+          "complexity": {
+            "type": "string",
+            "description": "利用复杂度",
+            "enum": ["trivial", "low", "medium", "high", "other"]
+          },
+          "controlled_by": {
+            "type": "array",
+            "description": "覆盖该向量的控制点实例ID列表",
+            "items": {"type": "string", "example": "CP-002"}
+          },
+          "control_effectiveness": {
+            "type": "string",
+            "description": "控制点对该向量的有效性评估",
+            "enum": ["strong", "medium", "weak", "bypassed", "missing"]
+          },
+          "code_evidence": {
+            "type": "array",
+            "description": "代码证据",
+            "items": {"type": "string", "example": "src/controllers/LoginController.java:42"}
+          }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "风险点列表",
+      "items": {
+        "type": "object",
+        "required": ["risk_id", "surface_id", "vector_id", "risk_type", "risk_name", "level"],
+        "properties": {
+          "risk_id": {
+            "type": "string",
+            "description": "风险实例ID，格式：RK-{序号}，序号从001递增",
+            "example": "RK-001"
+          },
+          "surface_id": {
+            "type": "string",
+            "description": "关联攻击面实例ID",
+            "example": "AS-001"
+          },
+          "vector_id": {
+            "type": "string",
+            "description": "关联攻击向量实例ID",
+            "example": "IV-001"
+          },
+          "risk_type": {
+            "type": "string",
+            "description": "风险类型KEY，来自enumeration.md第5章",
+            "example": "R-CONF-DATA-LEAK"
+          },
+          "risk_name": {
+            "type": "string",
+            "description": "风险名称，来自enumeration.md第5章",
+            "example": "数据泄露"
+          },
+          "risk_category": {
+            "type": "string",
+            "description": "风险类别",
+            "enum": ["vulnerability", "misconfiguration", "design_flaw", "compliance_gap", "dependency_risk", "other"]
+          },
+          "level": {
+            "type": "string",
+            "description": "风险等级",
+            "enum": ["critical", "high", "medium", "low", "info"]
+          },
+          "description": {
+            "type": "string",
+            "description": "风险描述",
+            "example": "登录接口SQL注入导致用户数据库全量泄露"
+          },
+          "impact": {
+            "type": "string",
+            "description": "影响描述",
+            "example": "机密性丧失：全量用户PII数据泄露"
+          },
+          "controlled_by": {
+            "type": "array",
+            "description": "覆盖该风险的控制点实例ID列表",
+            "items": {"type": "string", "example": "CP-002"}
+          },
+          "control_effectiveness": {
+            "type": "string",
+            "description": "控制有效性评估",
+            "enum": ["strong", "medium", "weak", "bypassed", "missing"]
+          },
+          "exploitability": {
+            "type": "string",
+            "description": "可利用性描述",
+            "example": "无需认证+互联网可达"
+          },
+          "evidence": {
+            "type": "array",
+            "description": "代码证据",
+            "items": {"type": "string", "example": "src/controllers/LoginController.java:42"}
+          }
+        }
+      }
+    },
+    "attack_chains": {
+      "type": "array",
+      "description": "攻击链列表（仅critical/high风险）",
+      "items": {
+        "type": "object",
+        "required": ["chain_id", "name", "steps"],
+        "properties": {
+          "chain_id": {
+            "type": "string",
+            "description": "攻击链实例ID，格式：AC-{序号}，序号从001递增",
+            "example": "AC-001"
+          },
+          "name": {
+            "type": "string",
+            "description": "攻击链名称",
+            "example": "SQL注入拖库链"
+          },
+          "steps": {
+            "type": "array",
+            "description": "攻击链步骤（5步：entry→vector→bypass→reach→impact）",
+            "items": {
+              "type": "object",
+              "required": ["step_id", "type", "description"],
+              "properties": {
+                "step_id": {
+                  "type": "integer",
+                  "description": "步骤序号",
+                  "example": 1
+                },
+                "type": {
+                  "type": "string",
+                  "description": "步骤类型",
+                  "enum": ["entry", "vector", "bypass", "reach", "impact"]
+                },
+                "attack_surface": {
+                  "type": "string",
+                  "description": "攻击面实例ID（entry步骤）",
+                  "example": "AS-001"
+                },
+                "attack_vector": {
+                  "type": "string",
+                  "description": "攻击向量实例ID（vector步骤）",
+                  "example": "IV-001"
+                },
+                "control_point": {
+                  "type": "string",
+                  "description": "控制点实例ID（bypass步骤）",
+                  "example": "CP-002"
+                },
+                "value_asset": {
+                  "type": "string",
+                  "description": "价值资产实例ID（reach步骤）",
+                  "example": "VA-001"
+                },
+                "risk": {
+                  "type": "string",
+                  "description": "风险实例ID（impact步骤）",
+                  "example": "RK-001"
+                },
+                "level": {
+                  "type": "string",
+                  "description": "风险等级（impact步骤）",
+                  "enum": ["critical", "high", "medium", "low", "info"]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "步骤描述",
+                  "example": "攻击者访问公开登录页面"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "surface_risk_mapping": {
+      "type": "array",
+      "description": "攻击面-向量-风险映射表",
+      "items": {
+        "type": "object",
+        "required": ["surface_id", "surface_name", "surfaces_type", "vector_risks"],
+        "properties": {
+          "surface_id": {
+            "type": "string",
+            "description": "攻击面实例ID",
+            "example": "AS-001"
+          },
+          "surface_name": {
+            "type": "string",
+            "description": "攻击面名称，来自enumeration.md第2章",
+            "example": "登录认证API"
+          },
+          "surfaces_type": {
+            "type": "string",
+            "description": "攻击面类型KEY",
+            "example": "NET-API-LOGIN"
+          },
+          "auth_required": {
+            "type": "string",
+            "description": "认证要求",
+            "enum": ["none", "token", "session", "certificate", "api_key", "oauth", "basic", "hmac", "custom", "unknown", "other"]
+          },
+          "network_zone": {
+            "type": "string",
+            "description": "网络区域",
+            "enum": ["internet", "dmz", "intranet", "cluster_internal", "localhost", "other"]
+          },
+          "vector_risks": {
+            "type": "array",
+            "description": "向量-风险列表",
+            "items": {
+              "type": "object",
+              "required": ["vector_id", "vector_type", "vector_name", "risks"],
+              "properties": {
+                "vector_id": {
+                  "type": "string",
+                  "description": "向量实例ID",
+                  "example": "IV-001"
+                },
+                "vector_type": {
+                  "type": "string",
+                  "description": "向量类型KEY",
+                  "example": "IV-SQL-UNION"
+                },
+                "vector_name": {
+                  "type": "string",
+                  "description": "向量名称",
+                  "example": "SQL Union注入"
+                },
+                "vector_category": {
+                  "type": "string",
+                  "description": "向量类别",
+                  "example": "注入类向量"
+                },
+                "complexity": {
+                  "type": "string",
+                  "description": "利用复杂度",
+                  "enum": ["trivial", "low", "medium", "high", "other"]
+                },
+                "controlled_by": {
+                  "type": "array",
+                  "description": "控制点实例ID列表",
+                  "items": {"type": "string", "example": "CP-002"}
+                },
+                "control_effectiveness": {
+                  "type": "string",
+                  "description": "控制有效性",
+                  "enum": ["strong", "medium", "weak", "bypassed", "missing"]
+                },
+                "risks": {
+                  "type": "array",
+                  "description": "风险列表",
+                  "items": {
+                    "type": "object",
+                    "required": ["risk_id", "risk_type", "risk_name", "level"],
+                    "properties": {
+                      "risk_id": {
+                        "type": "string",
+                        "description": "风险实例ID",
+                        "example": "RK-001"
+                      },
+                      "risk_type": {
+                        "type": "string",
+                        "description": "风险类型KEY",
+                        "example": "R-CONF-DATA-LEAK"
+                      },
+                      "risk_name": {
+                        "type": "string",
+                        "description": "风险名称",
+                        "example": "数据泄露"
+                      },
+                      "level": {
+                        "type": "string",
+                        "description": "风险等级",
+"enum": ["critical", "high", "medium", "low", "info", "other"]
+                      },
+                      "impact": {
+                        "type": "string",
+                        "description": "影响描述",
+                        "example": "全量用户PII数据泄露"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "statistics": {
+      "type": "object",
+      "description": "统计数据",
+      "required": ["total_assets", "total_surfaces", "total_vectors", "total_controls", "total_risks", "assets_summary", "surface_risk_summary", "vector_summary", "top_risks"],
+      "properties": {
+        "total_assets": {
+          "type": "integer",
+          "description": "资产总数",
+          "example": 5
+        },
+        "total_surfaces": {
+          "type": "integer",
+          "description": "攻击面总数",
+          "example": 8
+        },
+        "total_vectors": {
+          "type": "integer",
+          "description": "向量总数",
+          "example": 12
+        },
+        "total_controls": {
+          "type": "integer",
+          "description": "控制点总数",
+          "example": 6
+        },
+        "total_risks": {
+          "type": "integer",
+          "description": "风险总数",
+          "example": 18
+        },
+        "assets_summary": {
+          "type": "array",
+          "description": "资产类型汇总",
+          "items": {
+            "type": "object",
+            "properties": {
+              "asset_type": {"type": "string", "description": "资产类型KEY", "example": "data"},
+              "asset_name": {"type": "string", "description": "资产类型名称", "example": "数据资产"}
+            }
+          }
+        },
+        "surface_risk_summary": {
+          "type": "array",
+          "description": "攻击面类型风险汇总",
+          "items": {
+            "type": "object",
+            "properties": {
+              "surface_type": {"type": "string", "description": "攻击面类型KEY", "example": "NET-API-LOGIN"},
+              "surface_name": {"type": "string", "description": "攻击面类型名称", "example": "登录认证API"},
+              "surface_count": {"type": "integer", "description": "该类型攻击面数量", "example": 2},
+              "vector_count": {"type": "integer", "description": "向量数量", "example": 3},
+              "risk_count": {"type": "integer", "description": "风险数量", "example": 5},
+              "risk_distribution": {
+                "type": "object",
+                "description": "风险等级分布",
+                "properties": {
+                  "critical": {"type": "integer", "description": "Critical级数量", "example": 1},
+                  "high": {"type": "integer", "description": "High级数量", "example": 2},
+                  "medium": {"type": "integer", "description": "Medium级数量", "example": 1},
+                  "low": {"type": "integer", "description": "Low级数量", "example": 1},
+                  "info": {"type": "integer", "description": "Info级数量", "example": 0}
+                }
+              }
+            }
+          }
+        },
+        "vector_summary": {
+          "type": "array",
+          "description": "向量类型汇总",
+          "items": {
+            "type": "object",
+            "properties": {
+              "vector_type": {"type": "string", "description": "向量类型KEY", "example": "IV-SQL-UNION"},
+              "vector_name": {"type": "string", "description": "向量类型名称", "example": "SQL Union注入"},
+              "vector_count": {"type": "integer", "description": "该类型向量数量", "example": 2}
+            }
+          }
+        },
+        "top_risks": {
+          "type": "array",
+          "description": "Top风险列表",
+          "items": {
+            "type": "object",
+            "properties": {
+              "risk_id": {"type": "string", "example": "RK-001"},
+              "description": {"type": "string", "example": "登录接口SQL注入导致数据泄露"},
+              "level": {"type": "string", "enum": ["critical", "high", "medium", "low", "info"]},
+              "surface_id": {"type": "string", "example": "AS-001"},
+              "vector_id": {"type": "string", "example": "IV-001"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

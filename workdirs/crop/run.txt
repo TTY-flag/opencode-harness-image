@@ -1,0 +1,14 @@
+docker run --rm \
+  --name opencode-harness-crop \
+  -e HARNESS_WEB=true \
+  -e HARNESS_KEEP_WEB=true \
+  -e HARNESS_PUBLIC_URL=http://127.0.0.1:4096 \
+  -e OPENCODE_MODEL=alibaba-cn/glm-5 \
+  -e HARNESS_AUTH_PROVIDER=alibaba-cn \
+  -e HARNESS_AUTH_KEY="$DASHSCOPE_API_KEY" \
+  -p 127.0.0.1:4096:4096 \
+  -v "$PWD/workdirs/crop/entrypoint.sh:/entrypoint.sh:ro" \
+  -v "$PWD/workdirs/crop:/scan/opencode:ro" \
+  -v "/absolute/path/to/project:/scan/project:ro" \
+  -v "$PWD/output/crop:/scan/output" \
+  opencode-harness-image:base
