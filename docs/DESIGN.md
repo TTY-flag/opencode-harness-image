@@ -8,7 +8,7 @@
 
 - `crop`
 - `multi_langage`
-- `single_skill`
+- `threat_analysis`
 
 ## 镜像职责
 

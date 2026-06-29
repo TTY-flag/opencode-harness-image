@@ -16,7 +16,7 @@ docker build -t opencode-harness-image:base .
 ```text
 workdirs/crop
 workdirs/multi_langage
-workdirs/single_skill
+workdirs/threat_analysis
 ```
 
 运行时需要同时挂载：
