@@ -1,3 +1,21 @@
+# Windows PowerShell
+docker run --rm `
+  --name opencode-harness-crop `
+  -e HARNESS_WEB=true `
+  -e HARNESS_KEEP_WEB=true `
+  -e HARNESS_PUBLIC_URL=http://127.0.0.1:4096 `
+  -e OPENCODE_MODEL=alibaba-cn/glm-5 `
+  -e "OPENCODE_INITIAL_PROMPT=请扫描挂载的项目，项目目录为 /scan/project，输出目录为 /scan/output。请严格使用这些容器内绝对路径。项目目录的读写权限由 Docker 挂载方式决定。" `
+  -e HARNESS_AUTH_PROVIDER=alibaba-cn `
+  -e "HARNESS_AUTH_KEY=$env:DASHSCOPE_API_KEY" `
+  -p 127.0.0.1:4096:4096 `
+  -v "${PWD}\workdirs\crop\entrypoint.sh:/entrypoint.sh:ro" `
+  -v "${PWD}\workdirs\crop:/scan/opencode:ro" `
+  -v "C:\absolute\path\to\project:/scan/project:ro" `
+  -v "${PWD}\output\crop:/scan/output" `
+  opencode-harness-image:base
+
+# Linux Bash
 docker run --rm \
   --name opencode-harness-crop \
   -e HARNESS_WEB=true \

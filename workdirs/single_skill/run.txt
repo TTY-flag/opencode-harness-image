@@ -1,3 +1,21 @@
+# Windows PowerShell
+docker run --rm `
+  --name opencode-harness-single-skill `
+  -e HARNESS_WEB=true `
+  -e HARNESS_KEEP_WEB=true `
+  -e HARNESS_PUBLIC_URL=http://127.0.0.1:4098 `
+  -e OPENCODE_MODEL=alibaba-cn/glm-5 `
+  -e "OPENCODE_INITIAL_PROMPT=/threat-analysis 请扫描以下项目进行威胁分析，并严格使用给定的容器内绝对路径，输出格式和内容请严格遵照本skill;`n- 代码路径: /scan/project`n- 输出路径: /scan/output" `
+  -e HARNESS_AUTH_PROVIDER=alibaba-cn `
+  -e "HARNESS_AUTH_KEY=$env:DASHSCOPE_API_KEY" `
+  -p 127.0.0.1:4098:4096 `
+  -v "${PWD}\workdirs\single_skill\entrypoint.sh:/entrypoint.sh:ro" `
+  -v "${PWD}\workdirs\single_skill:/scan/opencode:ro" `
+  -v "C:\absolute\path\to\project:/scan/project:ro" `
+  -v "${PWD}\output\single_skill:/scan/output" `
+  opencode-harness-image:base
+
+# Linux Bash
 docker run --rm \
   --name opencode-harness-single-skill \
   -e HARNESS_WEB=true \
