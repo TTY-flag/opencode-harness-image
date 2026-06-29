@@ -63,8 +63,12 @@ apply_task_defaults() {
   export HARNESS_KEEP_WEB="${HARNESS_KEEP_WEB:-true}"
   export OPENCODE_FORMAT="${OPENCODE_FORMAT:-default}"
 
-  if [ -z "${HARNESS_PROMPT:-}" ] && [ -z "${HARNESS_PROMPT_FILE:-}" ]; then
-    HARNESS_PROMPT="$(cat <<'EOF_PROMPT'
+  if [ -z "${OPENCODE_INITIAL_PROMPT:-}" ] && [ -n "${HARNESS_PROMPT:-}" ]; then
+    export OPENCODE_INITIAL_PROMPT="$HARNESS_PROMPT"
+  fi
+
+  if [ -z "${OPENCODE_INITIAL_PROMPT:-}" ] && [ -z "${HARNESS_PROMPT_FILE:-}" ]; then
+    OPENCODE_INITIAL_PROMPT="$(cat <<'EOF_PROMPT'
 请使用 single_skill harness 对挂载项目进行安全分析。
 
 - PROJECT_ROOT: /scan/project
@@ -73,7 +77,7 @@ apply_task_defaults() {
 请加载当前 .opencode 中的 skill，并严格使用容器内路径。项目目录的读写权限由 Docker 挂载方式决定。
 EOF_PROMPT
 )"
-    export HARNESS_PROMPT
+    export OPENCODE_INITIAL_PROMPT
   fi
 }
 
@@ -294,6 +298,8 @@ build_prompt() {
   if [ -n "${HARNESS_PROMPT_FILE:-}" ]; then
     [ -f "$HARNESS_PROMPT_FILE" ] || die "HARNESS_PROMPT_FILE does not exist: $HARNESS_PROMPT_FILE"
     cat "$HARNESS_PROMPT_FILE"
+  elif [ -n "${OPENCODE_INITIAL_PROMPT:-}" ]; then
+    printf '%s' "$OPENCODE_INITIAL_PROMPT"
   elif [ -n "${HARNESS_PROMPT:-}" ]; then
     printf '%s' "$HARNESS_PROMPT"
   else
@@ -319,13 +325,14 @@ run_harness() {
   local prompt status
   local -a cmd
   prompt="$(build_prompt)"
+  export OPENCODE_INITIAL_PROMPT="$prompt"
   cmd=(opencode run --dir "$PROJECT_DIR" --format "${OPENCODE_FORMAT:-default}")
   [ -z "${OPENCODE_AGENT:-}" ] || cmd+=(--agent "$OPENCODE_AGENT")
   [ -z "${OPENCODE_MODEL:-}" ] || cmd+=(--model "$OPENCODE_MODEL")
   [ -z "${OPENCODE_VARIANT:-}" ] || cmd+=(--variant "$OPENCODE_VARIANT")
   [ -z "${HARNESS_TITLE:-}" ] || cmd+=(--title "$HARNESS_TITLE")
   is_true "$HARNESS_WEB" && cmd+=(--attach "$INTERNAL_URL")
-  [ -z "$prompt" ] || cmd+=("$prompt")
+  [ -z "$OPENCODE_INITIAL_PROMPT" ] || cmd+=("$OPENCODE_INITIAL_PROMPT")
 
   write_run_info "running"
   set +e

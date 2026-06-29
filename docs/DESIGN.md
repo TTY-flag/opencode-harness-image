@@ -57,8 +57,16 @@ OPENCODE_CONFIG=/root/.config/opencode/opencode.jsonc
 1. 加载 `.opencode` 到 `/root/.config/opencode`。
 2. 生成或复制 `auth.json`。
 3. 如 `HARNESS_WEB=true`，直接调用 `opencode web --hostname "$OPENCODE_HOSTNAME" --port "$OPENCODE_PORT"` 启动 OpenCode Web。
-4. 执行 `opencode run --dir /scan/project ...`。
-5. 发现 session URL 并写入 `/scan/output/runtime/run-info.json`。
+4. 将初始提示词解析并导出为 `OPENCODE_INITIAL_PROMPT`。
+5. 执行 `opencode run --dir /scan/project ... "$OPENCODE_INITIAL_PROMPT"`。
+6. 发现 session URL 并写入 `/scan/output/runtime/run-info.json`。
+
+初始提示词优先级：
+
+1. `HARNESS_PROMPT_FILE`
+2. `OPENCODE_INITIAL_PROMPT`
+3. `HARNESS_PROMPT`
+4. 任务入口内置默认值
 
 `HARNESS_MODE=web`：
 

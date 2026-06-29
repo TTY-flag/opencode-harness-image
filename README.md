@@ -38,4 +38,13 @@ workdirs/<task>               -> /scan/opencode
 - `HARNESS_MODE=serve`：加载配置后执行 `opencode serve`。
 - `HARNESS_MODE=shell`：加载配置后进入 shell，便于调试。
 
+## 初始提示词
+
+harness 模式下，任务入口会在启动 `opencode run` 前把初始提示词写入 `OPENCODE_INITIAL_PROMPT`。可通过环境变量覆盖：
+
+1. `HARNESS_PROMPT_FILE`：从文件读取，优先级最高。
+2. `OPENCODE_INITIAL_PROMPT`：推荐的直接覆盖方式。
+3. `HARNESS_PROMPT`：兼容旧变量。
+4. 任务 `entrypoint.sh` 内置默认提示词。
+
 每个任务目录的 `run.txt` 提供对应的 `docker run` 模板。
