@@ -173,7 +173,7 @@ write_run_info() {
 
   cat > "$RUN_INFO_PATH" <<EOF_INFO
 {
-  "status": "$(json_escape "$status")",
+  "run_status": "$(json_escape "$status")",
   "started_at": "$(json_escape "$STARTED_AT")",
   "updated_at": "$(json_escape "$now")",
   "finished_at": $(json_or_null "$FINISHED_AT"),
