@@ -4,6 +4,7 @@ docker run --rm \
   -e HARNESS_KEEP_WEB=true \
   -e HARNESS_PUBLIC_URL=http://127.0.0.1:4098 \
   -e OPENCODE_MODEL=alibaba-cn/glm-5 \
+  -e OPENCODE_INITIAL_PROMPT="请使用 single_skill harness 对挂载项目进行安全分析。请加载当前 .opencode 中的 skill，并严格使用容器内路径。项目目录的读写权限由 Docker 挂载方式决定。" \
   -e HARNESS_AUTH_PROVIDER=alibaba-cn \
   -e HARNESS_AUTH_KEY="$DASHSCOPE_API_KEY" \
   -p 127.0.0.1:4098:4096 \
