@@ -181,7 +181,6 @@ write_run_info() {
   "task": "$(json_escape "$TASK_NAME")",
   "mode": "$(json_escape "$MODE")",
   "project_dir": "$(json_escape "$PROJECT_DIR")",
-  "opencode_dir": $(json_or_null "$OPENCODE_SRC"),
   "config_dir": "$(json_escape "$CONFIG_DIR")",
   "output_dir": "$(json_escape "$OUTPUT_DIR")",
   "agent": $(json_or_null "${OPENCODE_AGENT:-}"),
