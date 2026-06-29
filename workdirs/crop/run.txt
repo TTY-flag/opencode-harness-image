@@ -1,6 +1,6 @@
 # Windows PowerShell
 $env:DASHSCOPE_API_KEY="replace-with-your-key"
-docker run --rm `
+docker run --rm -d `
   --name opencode-harness-crop `
   -e HARNESS_WEB=true `
   -e HARNESS_KEEP_WEB=true `
@@ -18,7 +18,7 @@ docker run --rm `
 
 # Linux Bash
 export DASHSCOPE_API_KEY="replace-with-your-key"
-docker run --rm \
+docker run --rm -d \
   --name opencode-harness-crop \
   -e HARNESS_WEB=true \
   -e HARNESS_KEEP_WEB=true \
