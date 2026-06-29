@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-TASK_NAME="crop"
 STATE_DIR="/tmp/opencode-harness"
 CONFIG_DIR="$HOME/.config/opencode"
 SESSION_ID_FILE="$STATE_DIR/session-id"
 SESSION_URL_FILE="$STATE_DIR/session-url"
 
-WORKDIR_DIR=""
 PROJECT_DIR=""
 OUTPUT_DIR=""
 AUTH_DIR=""
@@ -69,7 +67,7 @@ apply_task_defaults() {
 }
 
 load_runtime_config() {
-  WORKDIR_DIR="${HARNESS_WORKDIR:-/scan/opencode}"
+  local workdir_dir="${HARNESS_WORKDIR:-/scan/opencode}"
   PROJECT_DIR="${HARNESS_PROJECT_DIR:-/scan/project}"
   OUTPUT_DIR="${HARNESS_OUTPUT_DIR:-/scan/output}"
   AUTH_DIR="${HARNESS_AUTH_DIR:-/scan/auth}"
@@ -91,10 +89,10 @@ load_runtime_config() {
   if [ -n "${HARNESS_OPENCODE_DIR:-}" ]; then
     [ -d "$HARNESS_OPENCODE_DIR" ] || die "HARNESS_OPENCODE_DIR does not exist: $HARNESS_OPENCODE_DIR"
     OPENCODE_SRC="$HARNESS_OPENCODE_DIR"
-  elif [ -d "$WORKDIR_DIR/.opencode" ]; then
-    OPENCODE_SRC="$WORKDIR_DIR/.opencode"
-  elif [ -f "$WORKDIR_DIR/opencode.jsonc" ]; then
-    OPENCODE_SRC="$WORKDIR_DIR"
+  elif [ -d "$workdir_dir/.opencode" ]; then
+    OPENCODE_SRC="$workdir_dir/.opencode"
+  elif [ -f "$workdir_dir/opencode.jsonc" ]; then
+    OPENCODE_SRC="$workdir_dir"
   else
     OPENCODE_SRC=""
   fi
@@ -178,8 +176,6 @@ write_run_info() {
   "updated_at": "$(json_escape "$now")",
   "finished_at": $(json_or_null "$FINISHED_AT"),
   "exit_code": ${EXIT_CODE:-null},
-  "task": "$(json_escape "$TASK_NAME")",
-  "mode": "$(json_escape "$MODE")",
   "project_dir": "$(json_escape "$PROJECT_DIR")",
   "config_dir": "$(json_escape "$CONFIG_DIR")",
   "output_dir": "$(json_escape "$OUTPUT_DIR")",
