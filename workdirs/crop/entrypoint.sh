@@ -20,7 +20,6 @@ WEB_PID=""
 WATCHER_PID=""
 SESSION_ID=""
 SESSION_URL=""
-SESSION_URL_STATUS="disabled"
 EXIT_CODE=""
 FINISHED_AT=""
 STARTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
@@ -190,8 +189,7 @@ write_run_info() {
   "server_url": $(is_true "$HARNESS_WEB" && json_or_null "$PUBLIC_URL" || printf 'null'),
   "project_url": $(is_true "$HARNESS_WEB" && json_or_null "$(project_url)" || printf 'null'),
   "session_id": $(json_or_null "$SESSION_ID"),
-  "session_url": $(json_or_null "$SESSION_URL"),
-  "session_url_status": "$(json_escape "$SESSION_URL_STATUS")"
+  "session_url": $(json_or_null "$SESSION_URL")
 }
 EOF_INFO
 }
@@ -213,7 +211,6 @@ start_web() {
   for ((i = 0; i < 120; i++)); do
     code="$(curl -s -o /dev/null -w '%{http_code}' "${auth_args[@]}" "$INTERNAL_URL" 2>/dev/null || true)"
     if [ "$code" != "000" ]; then
-      SESSION_URL_STATUS="pending"
       log "OpenCode project URL: $(project_url)"
       return 0
     fi
@@ -251,7 +248,6 @@ load_session() {
   [ -f "$SESSION_ID_FILE" ] || return 1
   SESSION_ID="$(cat "$SESSION_ID_FILE")"
   SESSION_URL="$(cat "$SESSION_URL_FILE")"
-  SESSION_URL_STATUS="found"
 }
 
 watch_session() {
@@ -262,7 +258,6 @@ watch_session() {
     if [ -n "$id" ]; then
       SESSION_ID="$id"
       SESSION_URL="$(session_url_for "$id")"
-      SESSION_URL_STATUS="found"
       printf '%s' "$SESSION_ID" > "$SESSION_ID_FILE"
       printf '%s' "$SESSION_URL" > "$SESSION_URL_FILE"
       log "OpenCode session URL: $SESSION_URL"
@@ -306,8 +301,6 @@ run_harness() {
     write_run_info "server_ready"
     watch_session &
     WATCHER_PID=$!
-  else
-    SESSION_URL_STATUS="disabled"
   fi
 
   local prompt status
@@ -334,7 +327,6 @@ run_harness() {
     local deadline=$((SECONDS + HARNESS_POST_RUN_SESSION_WAIT))
     while [ "$SECONDS" -le "$deadline" ] && ! load_session; do sleep 1; done
     if [ -z "$SESSION_ID" ]; then
-      SESSION_URL_STATUS="not_found"
       log "OpenCode session URL: not found"
       log "OpenCode project URL: $(project_url)"
     fi
