@@ -66,7 +66,8 @@ OPENCODE_CONFIG=/root/.config/opencode/opencode.jsonc
 1. `HARNESS_PROMPT_FILE`
 2. `OPENCODE_INITIAL_PROMPT`
 3. `HARNESS_PROMPT`
-4. 任务入口内置默认值
+
+任务入口不内置默认提示词。harness 模式没有配置初始提示词时会直接退出，具体默认 prompt 只放在各任务 `run.txt` 的 `docker run` 模板里。
 
 `HARNESS_MODE=web`：
 

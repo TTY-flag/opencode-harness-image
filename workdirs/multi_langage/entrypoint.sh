@@ -67,19 +67,6 @@ apply_task_defaults() {
   if [ -z "${OPENCODE_INITIAL_PROMPT:-}" ] && [ -n "${HARNESS_PROMPT:-}" ]; then
     export OPENCODE_INITIAL_PROMPT="$HARNESS_PROMPT"
   fi
-
-  if [ -z "${OPENCODE_INITIAL_PROMPT:-}" ] && [ -z "${HARNESS_PROMPT_FILE:-}" ]; then
-    OPENCODE_INITIAL_PROMPT="$(cat <<'EOF_PROMPT'
-请扫描挂载的项目。
-
-- PROJECT_ROOT: /scan/project
-- OUTPUT_ROOT: /scan/output
-
-请严格使用容器内路径。项目目录的读写权限由 Docker 挂载方式决定。
-EOF_PROMPT
-)"
-    export OPENCODE_INITIAL_PROMPT
-  fi
 }
 
 load_runtime_config() {
@@ -304,7 +291,7 @@ build_prompt() {
   elif [ -n "${HARNESS_PROMPT:-}" ]; then
     printf '%s' "$HARNESS_PROMPT"
   else
-    printf 'Run the selected OpenCode harness against %s.' "$PROJECT_DIR"
+    die "OPENCODE_INITIAL_PROMPT is required in harness mode. Set it in docker run, or set HARNESS_PROMPT_FILE."
   fi
 }
 

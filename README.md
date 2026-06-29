@@ -40,11 +40,10 @@ workdirs/<task>               -> /scan/opencode
 
 ## 初始提示词
 
-harness 模式下，任务入口会在启动 `opencode run` 前把初始提示词写入 `OPENCODE_INITIAL_PROMPT`。可通过环境变量覆盖：
+harness 模式下必须在 `docker run` 时配置初始提示词。任务入口不会内置默认 prompt，只会在启动 `opencode run` 前把外部配置解析并写入 `OPENCODE_INITIAL_PROMPT`：
 
 1. `HARNESS_PROMPT_FILE`：从文件读取，优先级最高。
-2. `OPENCODE_INITIAL_PROMPT`：推荐的直接覆盖方式。
+2. `OPENCODE_INITIAL_PROMPT`：推荐的直接配置方式。
 3. `HARNESS_PROMPT`：兼容旧变量。
-4. 任务 `entrypoint.sh` 内置默认提示词。
 
 每个任务目录的 `run.txt` 提供对应的 `docker run` 模板。
