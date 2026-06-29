@@ -1,5 +1,5 @@
 # Windows PowerShell
-$env:DASHSCOPE_API_KEY="replace-with-your-key"; $env:HARNESS_HOST_PORT="4098"
+$env:DASHSCOPE_API_KEY="replace-with-your-key"; $env:HARNESS_HOST_PORT="14098"
 docker run --rm -d `
   --name opencode-harness-single-skill `
   -e HARNESS_WEB=true `
