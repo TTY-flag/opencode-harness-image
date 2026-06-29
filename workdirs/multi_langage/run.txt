@@ -1,15 +1,15 @@
 # Windows PowerShell
-$env:DASHSCOPE_API_KEY="replace-with-your-key"
+$env:DASHSCOPE_API_KEY="replace-with-your-key"; $env:HARNESS_HOST_PORT="4097"
 docker run --rm -d `
   --name opencode-harness-multi-langage `
   -e HARNESS_WEB=true `
   -e HARNESS_KEEP_WEB=true `
-  -e HARNESS_PUBLIC_URL=http://127.0.0.1:4097 `
+  -e "HARNESS_PUBLIC_URL=http://127.0.0.1:$($env:HARNESS_HOST_PORT)" `
   -e OPENCODE_MODEL=alibaba-cn/glm-5 `
   -e "OPENCODE_INITIAL_PROMPT=请扫描挂载的项目，项目目录为 /scan/project，输出目录为 /scan/output。请严格使用这些容器内绝对路径。项目目录的读写权限由 Docker 挂载方式决定。" `
   -e HARNESS_AUTH_PROVIDER=alibaba-cn `
   -e "HARNESS_AUTH_KEY=$env:DASHSCOPE_API_KEY" `
-  -p 127.0.0.1:4097:4096 `
+  -p "127.0.0.1:$($env:HARNESS_HOST_PORT):4096" `
   -v "${PWD}\workdirs\multi_langage\entrypoint.sh:/entrypoint.sh:ro" `
   -v "${PWD}\workdirs\multi_langage:/scan/opencode:ro" `
   -v "C:\absolute\path\to\project:/scan/project:ro" `
@@ -17,17 +17,17 @@ docker run --rm -d `
   opencode-harness-image:base
 
 # Linux Bash
-export DASHSCOPE_API_KEY="replace-with-your-key"
+export DASHSCOPE_API_KEY="replace-with-your-key" HARNESS_HOST_PORT="4097"
 docker run --rm -d \
   --name opencode-harness-multi-langage \
   -e HARNESS_WEB=true \
   -e HARNESS_KEEP_WEB=true \
-  -e HARNESS_PUBLIC_URL=http://127.0.0.1:4097 \
+  -e HARNESS_PUBLIC_URL="http://127.0.0.1:${HARNESS_HOST_PORT}" \
   -e OPENCODE_MODEL=alibaba-cn/glm-5 \
   -e OPENCODE_INITIAL_PROMPT="请扫描挂载的项目，项目目录为 /scan/project，输出目录为 /scan/output。请严格使用这些容器内绝对路径。项目目录的读写权限由 Docker 挂载方式决定。" \
   -e HARNESS_AUTH_PROVIDER=alibaba-cn \
   -e HARNESS_AUTH_KEY="$DASHSCOPE_API_KEY" \
-  -p 127.0.0.1:4097:4096 \
+  -p "127.0.0.1:${HARNESS_HOST_PORT}:4096" \
   -v "$PWD/workdirs/multi_langage/entrypoint.sh:/entrypoint.sh:ro" \
   -v "$PWD/workdirs/multi_langage:/scan/opencode:ro" \
   -v "/absolute/path/to/project:/scan/project:ro" \
